@@ -1,4 +1,0 @@
-(ns process-race-results.core)
-
-(defn return-columns [filename]
-  (clojure.string/split-lines (slurp filename)))
