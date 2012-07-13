@@ -1,5 +1,5 @@
 (ns process-race-results.core
-  (:use [clojure.string :only [split-lines split trim triml]])
+  (:use [clojure.string :only [split-lines split trim]])
   (:use [clojure.set :only [intersection]])
   (:use [clojure-csv.core :only [write-csv]])
   (:use [clojure.math.numeric-tower :only [expt]]))
@@ -27,29 +27,32 @@
 
 (defn split-line-by-indexes-list [line indexes-list]
   (for [indexes indexes-list]
-    (subs line (first indexes) (second indexes))))
+    (clojure.string/trim (subs line (first indexes) (second indexes)))))
 
 (defn convert-to-time-in-seconds [string]
   (if (not (= (.indexOf string ":") -1))
     (let [split-time (clojure.string/split string #":")]
-      (format "%d"
-              (reduce +
+      (reduce +
                       (map-indexed (fn [index value]
-                                     (* (expt 60 index) (Integer/parseInt (clojure.string/triml value))))
-                                   (reverse split-time)))))
+                                     (* (expt 60 index) (Integer/parseInt value)))
+                                   (reverse split-time))))
     string))
 
-(defn do-everything [file-name]
+(defn process-file-name [file-name]
   (let [file-as-list-of-strings (split-file-to-rows file-name)
         data-indexes (find-data-indexes file-as-list-of-strings)
         split-data (map (fn [string]
                           (let [asdf (split-line-by-indexes-list string data-indexes)]
                             (map convert-to-time-in-seconds asdf)))
-                        file-as-list-of-strings)
-        csv-string (clojure-csv.core/write-csv split-data)
-        csv-filename (str file-name ".csv")
-        ]
+                        file-as-list-of-strings)]
     
-    ;; split-data
-    (spit csv-filename csv-string)
-    ))
+    split-data))
+
+(defn process-file-name-to-csv [file-name]
+  (let [data (process-file-name file-name)
+        csv-string (clojure-csv.core/write-csv (map (fn [x]
+                                                      (map str x))
+                                                    data))
+        csv-filename (str file-name ".csv")]
+    (spit csv-filename csv-string)))
+
