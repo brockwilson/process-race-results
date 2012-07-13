@@ -2,7 +2,8 @@
   (:use [clojure.string :only [split-lines split trim]])
   (:use [clojure.set :only [intersection]])
   (:use [clojure-csv.core :only [write-csv]])
-  (:use [clojure.math.numeric-tower :only [expt]]))
+  (:use [clojure.math.numeric-tower :only [expt]])
+  (:use (incanter core stats charts)))
 
 
 
@@ -56,3 +57,5 @@
         csv-filename (str file-name ".csv")]
     (spit csv-filename csv-string)))
 
+;; (let [data (process-file-name "tender-knee-2012.dat")]
+;; 			       (view (histogram (map (fn [x] (nth x 3)) data))))
