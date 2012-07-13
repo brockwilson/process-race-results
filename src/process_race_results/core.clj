@@ -1,5 +1,5 @@
 (ns process-race-results.core
-  (:use [clojure.string :only [split-lines split trim]])
+  (:use [clojure.string :only [split-lines split trim triml]])
   (:use [clojure.set :only [intersection]])
   (:use [clojure-csv.core :only [write-csv]])
   (:use [clojure.math.numeric-tower :only [expt]]))
@@ -30,30 +30,26 @@
     (subs line (first indexes) (second indexes))))
 
 (defn convert-to-time-in-seconds [string]
-  ;; need to strip out white space
   (if (not (= (.indexOf string ":") -1))
     (let [split-time (clojure.string/split string #":")]
-      (reduce + 
-              (map-indexed (fn [index value]
-                             (println value)
-                             (* (clojure.math.numeric-tower/expt 60 index)
-                                (Integer/parseInt value)))
-                           (reverse split-time))))
+      (format "%d"
+              (reduce +
+                      (map-indexed (fn [index value]
+                                     (* (expt 60 index) (Integer/parseInt (clojure.string/triml value))))
+                                   (reverse split-time)))))
     string))
 
 (defn do-everything [file-name]
   (let [file-as-list-of-strings (split-file-to-rows file-name)
         data-indexes (find-data-indexes file-as-list-of-strings)
         split-data (map (fn [string]
-                          (map convert-to-time-in-seconds
-                               (split-line-by-indexes-list string data-indexes)))
+                          (let [asdf (split-line-by-indexes-list string data-indexes)]
+                            (map convert-to-time-in-seconds asdf)))
                         file-as-list-of-strings)
         csv-string (clojure-csv.core/write-csv split-data)
-        csv-filename (str file-name ".csv")]
-    (spit csv-filename csv-string)))
-
-;; (let [string "1:2:3"]
-;; 				(if (not (= (.indexOf string ":") -1))
-;; 				    (let [split-time (split string #":")]
-;; 					 (map-indexed (fn [index value]
-;; 							  (+ (
+        csv-filename (str file-name ".csv")
+        ]
+    
+    ;; split-data
+    (spit csv-filename csv-string)
+    ))
