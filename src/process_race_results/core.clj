@@ -44,18 +44,6 @@
 
 
 
-       (let [time-in-exponent (floor (/ time-in-seconds
-                                   (expt 60 exponent)))
-        base-string (str time-in-exponent)]
-    (if (< exponent 0)
-      nil
-      (str base-string
-           ":"
-           (recur (- time-in-seconds (* time-in-exponent (expt 60 exponent)))
-                  (- exponent 1))))))
-          
-  
-
 (defn find-char-in-string [string char]
   (map first
        (filter #(= (second %) char)
@@ -136,6 +124,3 @@
                                    (calculate-percentile (extract-single-leg-datum team-details x)
                                                          leg-data))]))
          (range 1 8))))
-
-;; (let [data (process-file-name "tender-knee-2012.dat")]
-;; 			       (view (histogram (map (fn [x] (nth x 3)) data))))
